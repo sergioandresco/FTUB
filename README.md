@@ -74,7 +74,6 @@ The page runs a small simulation in the browser (JavaScript, 1 step = 1 s of sim
 - `index.html`: the full dashboard (HTML + CSS + JS, no dependencies).
 - `assets/turbine-cad.jpg`: cutaway view of the Inventor CAD model, shown on the dashboard.
 - `README.md`: this file (deployment steps and project context).
-- `CLAUDE.md`: notes for Claude Code (not used by the site).
 
 ## 7. Suggested way to present it (1-2 minutes)
 1. Show the nominal state and say the numbers come from the calculation report.
