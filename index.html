@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<title>Monitor Turbina H₂</title>
+<style>
+html{color-scheme:light}body{margin:0}
+:root{--bg:#f2f4f3;--panel:#fff;--panel2:#eaeeed;--fg:#14211d;--mut:#5b6b66;--line:#d5dcd9;--acc:#0b7a6b;--h2:#1f6fd1;--n2:#8a5cc7;--ok:#1e8a4c;--warn:#b7791f;--crit:#c0392b;--okbg:#e0f2e7;--warnbg:#fbefd5;--critbg:#f9dedb;--pipe:#b8c3bf}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1514;--panel:#16201e;--panel2:#1d2a27;--fg:#e4ede9;--mut:#8da099;--line:#2a3a36;--acc:#3ac7ae;--h2:#5aa2ff;--n2:#b794f0;--ok:#4cd086;--warn:#f0b04a;--crit:#ff6b5b;--okbg:#17332a;--warnbg:#3a2f17;--critbg:#3d1d1a;--pipe:#34453f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1514;--panel:#16201e;--panel2:#1d2a27;--fg:#e4ede9;--mut:#8da099;--line:#2a3a36;--acc:#3ac7ae;--h2:#5aa2ff;--n2:#b794f0;--ok:#4cd086;--warn:#f0b04a;--crit:#ff6b5b;--okbg:#17332a;--warnbg:#3a2f17;--critbg:#3d1d1a;--pipe:#34453f;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+*{box-sizing:border-box}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+h1{font-size:20px;margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{color:var(--mut);font-size:12px;margin-top:2px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);letter-spacing:.04em}
+.pill.sim{color:var(--warn);border-color:var(--warn)}
+.pill.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
+.pill.crit{background:var(--critbg);color:var(--crit);border-color:var(--crit)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);margin:0 0 10px;font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.go{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+button.stop{border-color:var(--crit);color:var(--crit)}
+button.f.on{background:var(--critbg);border-color:var(--crit);color:var(--crit)}
+button.sp.on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+input[type=range]{accent-color:var(--acc);width:170px}
+label{font-size:12px;color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;border-left:4px solid var(--ok);min-width:0}
+.kpi.warn{border-left-color:var(--warn)}.kpi.crit{border-left-color:var(--crit)}.kpi.off{border-left-color:var(--line)}
+.kpi .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font-size:26px;font-weight:600;margin-top:2px}
+.kpi .v small{font-size:12px;color:var(--mut);font-weight:400;margin-left:4px}
+.kpi .n{font-size:11px;color:var(--mut)}
+.synwrap{overflow-x:auto}
+svg.syn{min-width:760px;width:100%;display:block}
+svg text{fill:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif}
+svg .m{fill:var(--mut);font-size:11px}
+svg .t{font-size:12px;font-weight:600}
+svg .v{font-size:12px;font-family:'IBM Plex Mono',monospace}
+.node{fill:var(--panel2);stroke:var(--line);stroke-width:1.5}
+.pipe{stroke:var(--pipe);stroke-width:6;fill:none;stroke-linecap:round}
+.pipe.h2{stroke:var(--h2)}.pipe.n2{stroke:var(--n2)}.pipe.flow{stroke-dasharray:10 8;animation:fl 1s linear infinite}
+@keyframes fl{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion:reduce){.pipe.flow{animation:none}}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.ch .h{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--mut)}
+.ch .h b{color:var(--fg);font-size:15px}
+svg.cht{width:100%;height:110px;display:block;margin-top:4px}
+.cht .g{stroke:var(--line);stroke-width:1}.cht .ln{fill:none;stroke:var(--acc);stroke-width:2}.cht .l2{fill:none;stroke:var(--h2);stroke-width:2}.cht .ref{stroke:var(--warn);stroke-dasharray:4 4;stroke-width:1}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.tw{overflow-x:auto}
+.log{max-height:250px;overflow-y:auto;font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+.log div{padding:4px 8px;border-radius:6px;background:var(--panel2);display:flex;gap:8px}
+.log .c{background:var(--critbg);color:var(--crit)}.log .w{background:var(--warnbg);color:var(--warn)}
+.log time{color:var(--mut);flex:none}
+.big{font-size:30px;font-weight:600;color:var(--ok)}
+.note{font-size:12px;color:var(--mut);line-height:1.5}
+.inv{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:6px}.inv i{display:block;height:100%;background:var(--h2)}
+.cad{margin:0}.cad img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:var(--panel2)}
+.cad figcaption{margin-top:8px}
+footer{font-size:11.5px;color:var(--mut);line-height:1.5;padding-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><h1>Monitor de turbina de gas a hidrógeno · 50 MW</h1>
+ <div class="sub">Gemelo digital · 3 etapas axiales · cámara Micromix · respaldo térmico de central hidroeléctrica</div></div>
+ <div class="badges"><span class="pill sim">DATOS SIMULADOS</span><span class="pill" id="mode">—</span><span class="pill" id="gal">Sin alarmas</span></div>
+</header>
+
+<section class="panel"><h2>Control del escenario</h2>
+ <div class="ctrl">
+  <div class="grp"><button class="go" id="bStart">Arrancar</button><button class="stop" id="bStop">Parada normal</button><button class="stop" id="bTrip">Disparo de emergencia</button></div>
+  <div class="grp"><label for="load">Carga solicitada <b class="mono" id="loadV">100 %</b></label><input type="range" id="load" min="40" max="100" value="100"></div>
+  <div class="grp"><label>Inyectar falla:</label><button class="f" data-f="leak">Fuga de H₂</button><button class="f" data-f="ot">Sobretemperatura</button><button class="f" data-f="vib">Vibración alta</button><button id="bClr">Despejar fallas</button></div>
+  <div class="grp"><label>Velocidad:</label><button class="sp on" data-s="1">1×</button><button class="sp" data-s="3">3×</button><button class="sp" data-s="8">8×</button></div>
+ </div>
+</section>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="panel"><h2>Ruta del hidrógeno y del gas caliente</h2>
+ <div class="synwrap"><svg class="syn" viewBox="0 0 1000 250" role="img" aria-label="Esquema de la línea de hidrógeno desde el tanque hasta los inyectores y la turbina">
+  <path class="pipe" id="p1" d="M110 80H170"/><path class="pipe" id="p2" d="M250 80H310"/><path class="pipe" id="p3" d="M390 80H450"/><path class="pipe" id="p4" d="M530 80H590"/>
+  <path class="pipe n2" id="pn" d="M470 200V120" style="opacity:.15"/>
+  <path class="pipe" id="p5" d="M690 80H730"/><path class="pipe" id="p6" d="M790 80H810"/><path class="pipe" id="p7" d="M870 80H890"/>
+  <g><rect class="node" x="30" y="45" width="80" height="70" rx="10"/><text class="t" x="70" y="68" text-anchor="middle">Tanque</text><text class="m" x="70" y="83" text-anchor="middle">H₂ gas</text><text class="v" id="sInv" x="70" y="104" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="170" y="45" width="80" height="70" rx="10"/><text class="t" x="210" y="68" text-anchor="middle">Regulador</text><text class="m" x="210" y="83" text-anchor="middle">12–15 bar</text><text class="v" id="sReg" x="210" y="104" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="310" y="45" width="80" height="70" rx="10"/><text class="t" x="350" y="68" text-anchor="middle">Válv. ctrl</text><text class="m" x="350" y="83" text-anchor="middle">apertura</text><text class="v" id="sVal" x="350" y="104" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="450" y="45" width="80" height="70" rx="10"/><text class="t" x="490" y="68" text-anchor="middle">Colector</text><text class="m" x="490" y="83" text-anchor="middle">anular</text><text class="v" id="sMan" x="490" y="104" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="590" y="35" width="100" height="90" rx="10"/><text class="t" x="640" y="58" text-anchor="middle">Cámara</text><text class="m" x="640" y="73" text-anchor="middle">~500 inyectores</text><text class="v" id="sT01" x="640" y="95" text-anchor="middle">—</text><circle id="flame" cx="640" cy="110" r="5" fill="var(--warn)" opacity="0"/></g>
+  <g><rect class="node" x="730" y="45" width="60" height="70" rx="10"/><text class="t" x="760" y="68" text-anchor="middle">Etapa 1</text><text class="v" id="sS1" x="760" y="90" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="810" y="45" width="60" height="70" rx="10"/><text class="t" x="840" y="68" text-anchor="middle">Etapa 2</text><text class="v" id="sS2" x="840" y="90" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="890" y="45" width="80" height="70" rx="10"/><text class="t" x="930" y="68" text-anchor="middle">Etapa 3</text><text class="v" id="sS3" x="930" y="90" text-anchor="middle">—</text></g>
+  <g><rect class="node" x="430" y="200" width="80" height="34" rx="8"/><text class="t" x="470" y="215" text-anchor="middle">Purga N₂</text><text class="m" id="sN2" x="470" y="228" text-anchor="middle">inactiva</text></g>
+  <g><rect class="node" x="760" y="160" width="210" height="50" rx="10"/><text class="t" x="865" y="180" text-anchor="middle">Eje · generador · red</text><text class="v" id="sGen" x="865" y="198" text-anchor="middle">—</text></g>
+  <path class="pipe" d="M865 115V160" style="stroke-width:3"/>
+  <text class="m" x="30" y="150">Línea SS 316L · arrestallamas antes del colector</text>
+  <text class="m" x="590" y="150">Puntas de inyector en Inconel</text>
+ </svg></div>
+</section>
+
+<section class="panel"><h2>Modelo CAD · vista en corte</h2>
+ <figure class="cad">
+  <img src="assets/turbine-cad.jpg" width="1458" height="761" loading="lazy" alt="Vista en corte del modelo CAD de la turbina de gas a hidrógeno: compresor axial, cámara de combustión y etapas de turbina">
+  <figcaption class="note">Modelo 3D en Autodesk Inventor. Corte longitudinal que muestra el compresor axial, la cámara de combustión y las etapas de la turbina.</figcaption>
+ </figure>
+</section>
+
+<section class="two">
+ <div class="panel"><h2>Etapas de la turbina · diseño vs. medido</h2><div class="tw"><table id="stTab"></table></div>
+ <p class="note" style="margin:8px 0 0">Diseño: memoria de cálculos (η = 0.88, γ = 1.33, ṁ = 84.35 kg/s). Ca se estima de ṁ/(ρA) con el área de paso de cada etapa.</p></div>
+ <div class="panel"><h2>Emisiones y combustible</h2>
+  <div class="grp" style="gap:22px;align-items:flex-start">
+   <div><div class="l note">CO₂ evitado vs. gas natural</div><div class="big mono"><span id="avd">0.00</span><small style="font-size:13px;color:var(--mut)"> t</small></div><div class="note mono" id="avr">—</div></div>
+   <div style="flex:1;min-width:160px"><div class="note">Inventario de H₂ en tanque</div><div class="mono" id="invT" style="font-size:20px;font-weight:600">—</div><div class="inv"><i id="invB"></i></div><div class="note" id="invA" style="margin-top:6px">—</div></div>
+  </div>
+  <p class="note" style="margin:10px 0 0">El H₂ no emite CO₂ en la combustión. La cifra compara con quemar gas natural (CH₄) con el mismo calor aportado. El control de NOx depende de la temperatura de llama (Micromix).</p>
+ </div>
+</section>
+
+<section class="charts" id="charts"></section>
+
+<section class="panel"><h2>Registro de eventos y alarmas</h2><div class="log" id="log"></div></section>
+
+<footer>Esta interfaz es un gemelo digital: no hay turbina ni sensores reales. Todos los valores se calculan con las ecuaciones y los datos de diseño del proyecto (expansión real por etapas, balance de energía en la cámara) más ruido aleatorio. A carga parcial se supuso que ṁ baja hasta 70 % y que T<sub>01</sub> se ajusta para entregar la potencia pedida. Umbrales de alarma: valores de ejemplo para demostración, no de norma.</footer>
+</div>
+<script>
+// ---------- Modelo de la turbina (valores de diseño de la memoria de cálculos) ----------
+const D = {
+  P_MW: 50, N: 9000, T01: 1400, P01: 10, P02: 1.2, MDOT: 84.35,
+  CP: 1150, GAMMA: 1.33, R: 287, ETA: 0.88,
+  AREAS: [0.114, 0.189, 0.341],
+  LHV_H2: 120e6, LHV_CH4: 50e6, CO2_PER_CH4: 2.75,
+  TANK_KG: 20000,
+};
+const KEXP = (D.GAMMA - 1) / D.GAMMA;
+const DESIGN_STAGES = [
+  { p: 4.93, t: 1201.9, ca: 517.4 },
+  { p: 2.43, t: 1031.8, ca: 543.1 },
+  { p: 1.20, t: 885.8, ca: 523.8 },
+];
+
+function lerp(a, b, k) { return a + (b - a) * k; }
+function noise(a) { return (Math.random() - 0.5) * 2 * a; }
+
+function pOf(mdot, t01) { return Math.max(1, D.P01 * (mdot / D.MDOT) * Math.sqrt(t01 / D.T01)); }
+
+// Expansión real etapa por etapa (misma cadena de la memoria, sección 2.2)
+function chain(t01, p01) {
+  if (p01 <= D.P02) return null;
+  const pr = Math.pow(p01 / D.P02, 1 / 3);
+  let T = t01, P = p01;
+  const out = [];
+  for (let i = 0; i < 3; i++) {
+    const Pout = P / pr;
+    const Ts = T * Math.pow(Pout / P, KEXP);
+    const Tout = T - D.ETA * (T - Ts);
+    out.push({ p: Pout, t: Tout });
+    T = Tout; P = Pout;
+  }
+  return out;
+}
+function powerMW(mdot, t01, p01) {
+  const st = chain(t01, p01);
+  return st ? mdot * D.CP * (t01 - st[2].t) / 1e6 : 0;
+}
+const P_NOM = powerMW(D.MDOT, D.T01, D.P01);
+
+// Punto de operación a carga parcial (supuesto: el flujo másico baja 30 % de la carga y T01 se ajusta)
+function plantPoint(L) {
+  const mdot = D.MDOT * (0.7 + 0.3 * L);
+  const target = P_NOM * L;
+  let lo = 600, hi = 1600;
+  for (let i = 0; i < 48; i++) {
+    const m = (lo + hi) / 2;
+    if (powerMW(mdot, m, pOf(mdot, m)) < target) lo = m; else hi = m;
+  }
+  const t = (lo + hi) / 2;
+  return { mdot, t01: t, p01: pOf(mdot, t) };
+}
+const TABLE = [];
+for (let i = 0; i <= 100; i++) TABLE.push(plantPoint(i / 100));
+function pointAt(L) {
+  const x = Math.min(1, Math.max(0.4, L)) * 100;
+  const i = Math.floor(x), f = x - i;
+  const a = TABLE[i], b = TABLE[Math.min(100, i + 1)];
+  return { mdot: lerp(a.mdot, b.mdot, f), t01: lerp(a.t01, b.t01, f), p01: lerp(a.p01, b.p01, f) };
+}
+
+// ---------- Alarmas ----------
+const ALARMS = [
+  { id: 't01', name: 'T entrada turbina', lvl: s => !s.flame ? 0 : s.t01 > 1470 ? 2 : s.t01 > 1430 ? 1 : 0,
+    msg: ['', 'T entrada turbina alta (> 1430 K)', 'T entrada turbina muy alta (> 1470 K)'] },
+  { id: 'vib', name: 'Vibración', lvl: s => s.rpm < 1000 ? 0 : s.vib > 7.1 ? 2 : s.vib > 4.5 ? 1 : 0,
+    msg: ['', 'Vibración alta (> 4.5 mm/s)', 'Vibración muy alta (> 7.1 mm/s)'] },
+  { id: 'lel', name: 'H₂ en ambiente', lvl: s => s.lel > 25 ? 2 : s.lel > 10 ? 1 : 0,
+    msg: ['', 'H₂ en ambiente sobre 10 % LIE', 'H₂ en ambiente sobre 25 % LIE'] },
+  { id: 'nox', name: 'NOx', lvl: s => s.nox > 25 ? 1 : 0,
+    msg: ['', 'NOx sobre 25 ppm (a 15 % O₂)', ''] },
+  { id: 'ph2', name: 'Presión de H₂', lvl: s => (s.cut && s.flame && (s.man - s.p01) < 1.2) ? 1 : 0,
+    msg: ['', 'Presión de H₂ insuficiente en el colector', ''] },
+];
+const ACTIVE_MODES = ['PURGA', 'ENCENDIDO', 'ACELERACION', 'SINCRONIZACION', 'CARGA', 'OPERACION'];
+const RUNNING_MODES = ['SINCRONIZACION', 'CARGA', 'OPERACION'];
+
+function newState() {
+  const pt = plantPoint(1);
+  return {
+    mode: 'OPERACION', modeT: 0, load: 1, loadSet: 1, rpm: D.N,
+    t01: pt.t01, p01: pt.p01, mdot: pt.mdot, tcam: 600, power: P_NOM,
+    flame: true, cut: true, purge: false,
+    lel: 0.3, vib: 1.8, vibF: 0, nox: 9, reg: 12.5, man: 12.0, mh2: 0.65, valve: 83,
+    inv: D.TANK_KG * 0.818,
+    faults: { leak: false, ot: false, vib: false },
+    lvl: {}, stages: null, avoided: 0, avoidRate: 0, trip: null,
+  };
+}
+
+function anyFault(s) { return s.faults.leak || s.faults.ot || s.faults.vib; }
+function canStart(s) { return s.mode === 'PARADA' && !anyFault(s) && s.lel < 10; }
+
+function tripNow(s, reason) {
+  s.mode = 'DISPARO'; s.modeT = 0; s.trip = reason;
+  return { type: 'info', sev: 'crit', msg: 'Disparo de turbina: ' + reason };
+}
+
+function step(s) {
+  const ev = [];
+  const f = s.faults;
+  s.modeT += 1;
+
+  // --- Máquina de estados
+  switch (s.mode) {
+    case 'PARADA':
+      s.rpm = 0; s.load = 0; s.cut = false; s.flame = false; s.purge = false; break;
+    case 'PURGA':
+      s.purge = true; s.cut = false; s.flame = false; s.rpm = lerp(s.rpm, 900, 0.35);
+      if (s.modeT >= 8) { s.mode = 'ENCENDIDO'; s.modeT = 0; ev.push({ type: 'info', sev: 'info', msg: 'Purga con N₂ completa. Se abre la válvula de corte de H₂' }); }
+      break;
+    case 'ENCENDIDO':
+      s.purge = false; s.cut = true; s.rpm = 900 + noise(8);
+      if (s.modeT === 2) { s.flame = true; ev.push({ type: 'info', sev: 'info', msg: 'Llama detectada en la cámara' }); }
+      if (s.modeT >= 5) { s.mode = 'ACELERACION'; s.modeT = 0; }
+      break;
+    case 'ACELERACION':
+      s.rpm = Math.min(D.N, s.rpm + 380);
+      if (s.rpm >= D.N) { s.mode = 'SINCRONIZACION'; s.modeT = 0; ev.push({ type: 'info', sev: 'info', msg: 'Velocidad nominal alcanzada. Sincronizando con la red' }); }
+      break;
+    case 'SINCRONIZACION':
+      s.rpm = D.N + noise(6);
+      if (s.modeT >= 4) { s.mode = 'CARGA'; s.modeT = 0; ev.push({ type: 'info', sev: 'info', msg: 'Interruptor cerrado. Subiendo carga' }); }
+      break;
+    case 'CARGA':
+      s.rpm = D.N + noise(6); s.load = Math.min(s.loadSet, s.load + 0.04);
+      if (s.load >= s.loadSet - 1e-6) { s.mode = 'OPERACION'; s.modeT = 0; ev.push({ type: 'info', sev: 'info', msg: 'Operación estable en ' + Math.round(s.loadSet * 100) + ' % de carga' }); }
+      break;
+    case 'OPERACION':
+      s.rpm = D.N + noise(6); s.load = lerp(s.load, s.loadSet, 0.2);
+      if (Math.abs(s.load - s.loadSet) < 0.004) s.load = s.loadSet;
+      break;
+    case 'DISPARO':
+      s.cut = false; s.flame = false; s.load = 0; s.rpm *= 0.93; s.purge = s.modeT <= 30;
+      if (s.rpm < 250) { s.rpm = 0; s.mode = 'PARADA'; s.modeT = 0; s.purge = false; ev.push({ type: 'info', sev: 'info', msg: 'Turbina detenida' }); }
+      break;
+  }
+  const running = RUNNING_MODES.includes(s.mode);
+  const rpmF = s.rpm / D.N;
+
+  // --- Termodinámica
+  let t01T, mdotT;
+  if (!s.flame) { t01T = 320 + 60 * rpmF; mdotT = D.MDOT * 0.7 * rpmF; }
+  else if (s.mode === 'ENCENDIDO' || s.mode === 'ACELERACION') { t01T = 650 + 350 * rpmF; mdotT = D.MDOT * 0.7 * rpmF; }
+  else { const pt = pointAt(Math.max(0.4, s.load)); t01T = pt.t01; mdotT = pt.mdot; }
+  const otActive = s.flame && f.ot && running;
+  if (otActive) t01T = 1500;
+  const kT = otActive ? 0.12 : (s.flame ? 0.25 : 0.08);
+  s.t01 = lerp(s.t01, t01T, kT) + noise(s.flame ? 2.5 : 0.3);
+  s.mdot = lerp(s.mdot, mdotT, 0.3);
+  s.p01 = pOf(s.mdot, s.t01) + (running ? noise(0.03) : 0);
+  s.tcam = s.rpm < 500 ? 300 : 300 + 300 * Math.pow(s.p01 / D.P01, 0.25);
+
+  s.stages = running ? chain(s.t01, s.p01) : null;
+  if (s.stages && s.mode !== 'SINCRONIZACION') {
+    s.power = powerMW(s.mdot, s.t01, s.p01) * Math.min(1, s.load / 0.4) + noise(0.05);
+  } else s.power = 0;
+
+  // --- Línea de H2
+  s.mh2 = (s.cut && s.flame) ? Math.max(0, s.mdot * D.CP * Math.max(0, s.t01 - s.tcam) / D.LHV_H2 + noise(0.004)) : 0;
+  s.valve = (s.cut && s.flame) ? Math.min(100, s.mh2 / 0.78 * 100) : 0;
+  const regT = s.cut ? 12.5 - 0.08 * Math.max(0, s.lel - 0.5) : 1.0;
+  s.reg = lerp(s.reg, regT, 0.15);
+  const manT = s.cut ? Math.min(s.reg - 0.5, s.p01 + 2.0) : (s.purge ? 3.0 : 1.0);
+  s.man = lerp(s.man, manT, 0.3) + (s.cut ? noise(0.03) : 0);
+  s.inv = Math.max(0, s.inv - s.mh2);
+
+  // --- Sensores y fallas
+  s.lel = f.leak ? Math.min(40, s.lel + 2.5 + noise(0.4)) : Math.max(0.3, s.lel * 0.88);
+  s.vibF = f.vib && s.rpm > 1000 ? Math.min(5.8, s.vibF + 0.45) : s.vibF * 0.9;
+  s.vib = 1.8 * rpmF * rpmF + s.vibF + noise(0.05) + (s.rpm > 0 ? 0.05 : 0);
+  s.nox = s.flame ? (running ? 9 * Math.exp((s.t01 - D.T01) / 55) * (1 + noise(0.04)) : 4) : 0;
+
+  // --- Emisiones evitadas frente a gas natural con el mismo calor aportado
+  const heatMW = s.mh2 * D.LHV_H2 / 1e6;
+  s.avoidRate = heatMW * 1e6 / D.LHV_CH4 * D.CO2_PER_CH4 * 3.6 / 1000; // t CO2/h
+  s.avoided += s.avoidRate / 3600;
+
+  // --- Alarmas
+  let tripReason = null;
+  for (const a of ALARMS) {
+    const nl = a.lvl(s), ol = s.lvl[a.id] || 0;
+    if (nl > ol) {
+      ev.push({ type: 'raise', id: a.id, sev: nl, msg: a.msg[nl] });
+      if (nl === 2 && ACTIVE_MODES.includes(s.mode) && !tripReason && a.id !== 'lel') tripReason = a.msg[2];
+      if (nl === 2 && a.id === 'lel' && ACTIVE_MODES.includes(s.mode) && !tripReason) tripReason = a.msg[2];
+    } else if (nl < ol) {
+      ev.push({ type: 'clear', id: a.id, to: nl });
+    }
+    s.lvl[a.id] = nl;
+  }
+  if (tripReason) ev.push(tripNow(s, tripReason));
+  return ev;
+}
+
+const $ = id => document.getElementById(id);
+let S = newState(), speed = 1, t = 0;
+const HIST = 120;
+const hist = { p: [], t01: [], man: [], p01: [], vib: [], lel: [] };
+const f1 = (x, d = 1) => x.toFixed(d);
+function cls(l) { return l === 2 ? 'crit' : l === 1 ? 'warn' : ''; }
+
+const KP = [
+ { id: 'pow', l: 'Potencia', u: 'MW', n: 'nominal 50' , f: s => f1(s.power), lv: s => 0 },
+ { id: 'rpm', l: 'Velocidad', u: 'rpm', n: 'nominal 9000', f: s => Math.round(s.rpm).toLocaleString('es-CO'), lv: s => 0 },
+ { id: 't01', l: 'T entrada turbina', u: 'K', n: 'nominal 1400 · alarma 1430', f: s => Math.round(s.t01), lv: s => s.lvl.t01 || 0 },
+ { id: 'p01', l: 'P entrada turbina', u: 'bar', n: 'nominal 10', f: s => f1(s.p01, 2), lv: s => 0 },
+ { id: 'mdot', l: 'Flujo másico gases', u: 'kg/s', n: 'nominal 84.35', f: s => f1(s.mdot, 1), lv: s => 0 },
+ { id: 'mh2', l: 'Flujo de H₂', u: 'kg/s', n: 'combustible en cámara', f: s => f1(s.mh2, 3), lv: s => 0 },
+ { id: 'vib', l: 'Vibración', u: 'mm/s', n: 'alarma 4.5 · disparo 7.1', f: s => f1(s.vib, 2), lv: s => s.lvl.vib || 0 },
+ { id: 'lel', l: 'H₂ en ambiente', u: '% LIE', n: 'alarma 10 · disparo 25', f: s => f1(s.lel, 1), lv: s => s.lvl.lel || 0 },
+ { id: 'nox', l: 'NOx', u: 'ppm @15 % O₂', n: 'alarma 25', f: s => f1(s.nox, 1), lv: s => s.lvl.nox || 0 },
+];
+$('kpis').innerHTML = KP.map(k => `<div class="kpi" id="k_${k.id}"><div class="l">${k.l}</div><div class="v mono"><span id="v_${k.id}">—</span><small>${k.u}</small></div><div class="n">${k.n}</div></div>`).join('');
+
+const CH = [
+ { id: 'p', t: 'Potencia eléctrica (MW)', a: ['p'], max: 55, ref: 50 },
+ { id: 't01', t: 'T entrada turbina (K)', a: ['t01'], min: 300, max: 1600, ref: 1430 },
+ { id: 'man', t: 'Presión H₂ en colector vs. P01 (bar)', a: ['man', 'p01'], max: 16 },
+ { id: 'vib', t: 'Vibración (mm/s)', a: ['vib'], max: 9, ref: 4.5 },
+];
+$('charts').innerHTML = CH.map(c => `<div class="panel ch"><div class="h"><span>${c.t}</span><b class="mono" id="cv_${c.id}">—</b></div><svg class="cht" viewBox="0 0 300 110" preserveAspectRatio="none"><line class="g" x1="0" y1="27" x2="300" y2="27"/><line class="g" x1="0" y1="55" x2="300" y2="55"/><line class="g" x1="0" y1="83" x2="300" y2="83"/>${c.ref ? '<line class="ref" id="cr_' + c.id + '" x1="0" x2="300"/>' : ''}<polyline class="ln" id="c1_${c.id}"/>${c.a[1] ? '<polyline class="l2" id="c2_' + c.id + '"/>' : ''}</svg></div>`).join('');
+
+function poly(arr, min, max) {
+  const n = HIST;
+  return arr.map((v, i) => `${((i + (n - arr.length)) / (n - 1) * 300).toFixed(1)},${(104 - (Math.min(max, Math.max(min, v)) - min) / (max - min) * 98).toFixed(1)}`).join(' ');
+}
+
+function logEv(sev, msg) {
+  const d = document.createElement('div');
+  d.className = sev === 'crit' || sev === 2 ? 'c' : sev === 1 ? 'w' : '';
+  const m = Math.floor(t / 60), s = t % 60;
+  d.innerHTML = `<time class="mono">${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}</time><span></span>`;
+  d.lastChild.textContent = msg;
+  const L = $('log'); L.prepend(d); while (L.children.length > 60) L.lastChild.remove();
+}
+
+function render() {
+  const s = S;
+  const mp = $('mode');
+  const names = { PARADA: 'PARADA', PURGA: 'PURGA N₂', ENCENDIDO: 'ENCENDIDO', ACELERACION: 'ACELERANDO', SINCRONIZACION: 'SINCRONIZANDO', CARGA: 'SUBIENDO CARGA', OPERACION: 'EN OPERACIÓN', DISPARO: 'DISPARO' };
+  mp.textContent = names[s.mode]; mp.className = 'pill ' + (s.mode === 'OPERACION' ? 'ok' : s.mode === 'DISPARO' ? 'crit' : s.mode === 'PARADA' ? '' : 'warn');
+  const mx = Math.max(0, ...Object.values(s.lvl));
+  const g = $('gal'); g.textContent = mx === 2 ? 'Alarma crítica' : mx === 1 ? 'Alarma activa' : 'Sin alarmas'; g.className = 'pill ' + cls(mx).replace('', 'ok').replace('okcrit', 'crit').replace('okwarn', 'warn');
+  if (mx === 0) g.className = 'pill ok'; else g.className = 'pill ' + (mx === 2 ? 'crit' : 'warn');
+  KP.forEach(k => { $('v_' + k.id).textContent = k.f(s); const l = k.lv(s); $('k_' + k.id).className = 'kpi ' + cls(l) + (s.mode === 'PARADA' && k.id !== 'lel' && k.id !== 'vib' ? ' off' : ''); });
+  // sinóptico
+  const fl = s.cut && s.flame;
+  ['p1', 'p2', 'p3', 'p4'].forEach(id => { const e = $(id); e.setAttribute('class', 'pipe' + (s.cut ? ' h2' : '') + (fl ? ' flow' : '')); });
+    const pn = $('pn'); pn.style.opacity = s.purge ? 1 : .15; pn.setAttribute('class', 'pipe n2' + (s.purge ? ' flow' : ''));
+  $('sN2').textContent = s.purge ? 'EN CURSO' : 'inactiva';
+  ['p5', 'p6', 'p7'].forEach(id => { $(id).setAttribute('class', 'pipe' + (s.stages ? ' flow' : '')); $(id).style.stroke = s.stages ? 'var(--warn)' : ''; });
+  $('flame').setAttribute('opacity', s.flame ? 1 : 0);
+  $('sInv').textContent = f1(s.inv / 1000, 1) + ' t';
+  $('sReg').textContent = f1(s.reg, 1) + ' bar';
+  $('sVal').textContent = Math.round(s.valve) + ' %';
+  $('sMan').textContent = f1(s.man, 1) + ' bar';
+  $('sT01').textContent = Math.round(s.t01) + ' K';
+  [0, 1, 2].forEach(i => $('sS' + (i + 1)).textContent = s.stages ? f1(s.stages[i].p, 2) + ' bar' : '—');
+  $('sGen').textContent = f1(s.power) + ' MW · ' + Math.round(s.rpm) + ' rpm';
+  // etapas
+  let h = '<tr><th>Etapa</th><th>P diseño</th><th>P medida</th><th>T diseño</th><th>T medida</th><th>Ca medida</th></tr>';
+  DESIGN_STAGES.forEach((d, i) => {
+    const m = s.stages && s.stages[i];
+    const ca = m ? s.mdot / ((m.p * 1e5 / (D.R * m.t)) * D.AREAS[i]) : null;
+    h += `<tr><td>${i + 1}</td><td class="mono">${d.p.toFixed(2)}</td><td class="mono">${m ? m.p.toFixed(2) : '—'}</td><td class="mono">${d.t.toFixed(1)}</td><td class="mono">${m ? m.t.toFixed(1) : '—'}</td><td class="mono">${ca ? ca.toFixed(0) : '—'} <span style="color:var(--mut)">/ ${d.ca.toFixed(0)}</span></td></tr>`;
+  });
+  h += '<tr><td colspan="6" class="note" style="text-align:left;border:0">Unidades: P en bar, T en K, Ca en m/s (medida / diseño).</td></tr>';
+  $('stTab').innerHTML = h;
+  // emisiones
+  $('avd').textContent = f1(s.avoided, 2);
+  $('avr').textContent = f1(s.avoidRate, 1) + ' t CO₂/h';
+  $('invT').textContent = f1(s.inv / 1000, 2) + ' t de ' + (D.TANK_KG / 1000) + ' t';
+  $('invB').style.width = (s.inv / D.TANK_KG * 100) + '%';
+  $('invA').textContent = s.mh2 > 0 ? 'Autonomía a este consumo: ' + f1(s.inv / s.mh2 / 3600, 1) + ' h' : 'Sin consumo';
+  // gráficos
+  CH.forEach(c => {
+    const mn = c.min || 0;
+    $('c1_' + c.id).setAttribute('points', poly(hist[c.a[0]], mn, c.max));
+    if (c.a[1]) $('c2_' + c.id).setAttribute('points', poly(hist[c.a[1]], mn, c.max));
+    if (c.ref) { const y = 104 - (c.ref - mn) / (c.max - mn) * 98; const r = $('cr_' + c.id); r.setAttribute('y1', y); r.setAttribute('y2', y); }
+    const last = hist[c.a[0]][hist[c.a[0]].length - 1];
+    $('cv_' + c.id).textContent = last === undefined ? '—' : f1(last, c.id === 't01' ? 0 : 1);
+  });
+  // botones
+  const run = !['PARADA'].includes(s.mode);
+  $('bStart').disabled = !canStart(s); $('bStart').title = s.mode === 'PARADA' && anyFault(s) ? 'Despeje las fallas para poder arrancar' : '';
+  $('bStop').disabled = !RUNNING_MODES.includes(s.mode);
+  $('bTrip').disabled = !ACTIVE_MODES.includes(s.mode);
+  document.querySelectorAll('button.f').forEach(b => b.classList.toggle('on', s.faults[b.dataset.f]));
+  $('loadV').textContent = Math.round(s.loadSet * 100) + ' %';
+}
+
+function tick() {
+  for (let i = 0; i < speed; i++) {
+    t++;
+    const ev = step(S);
+    ev.forEach(e => {
+      if (e.type === 'raise') logEv(e.sev, e.msg);
+      else if (e.type === 'clear' && e.to === 0) logEv(0, 'Alarma normalizada: ' + ALARMS.find(a => a.id === e.id).name);
+      else if (e.type === 'info') logEv(e.sev, e.msg);
+    });
+    if (S.mode === 'PARADA' && S.modeT === 0 && false) {}
+    hist.p.push(S.power); hist.t01.push(S.t01); hist.man.push(S.man); hist.p01.push(S.p01); hist.vib.push(S.vib); hist.lel.push(S.lel);
+    Object.values(hist).forEach(a => { if (a.length > HIST) a.shift(); });
+  }
+  render();
+}
+
+$('bStart').onclick = () => { if (canStart(S)) { S.mode = 'PURGA'; S.modeT = 0; S.trip = null; logEv(0, 'Orden de arranque. Inicia purga con N₂ de la línea de H₂'); render(); } };
+$('bStop').onclick = () => { if (RUNNING_MODES.includes(S.mode)) { S.mode = 'DISPARO'; S.modeT = 0; logEv(0, 'Parada normal solicitada'); render(); } };
+$('bTrip').onclick = () => { if (ACTIVE_MODES.includes(S.mode)) { tripNow(S, 'Botón de emergencia'); logEv('crit', 'Disparo de emergencia accionado por el operador'); render(); } };
+$('load').oninput = e => { S.loadSet = e.target.value / 100; if (S.mode === 'OPERACION') { } $('loadV').textContent = e.target.value + ' %'; };
+document.querySelectorAll('button.f').forEach(b => b.onclick = () => { S.faults[b.dataset.f] = !S.faults[b.dataset.f]; logEv(0, (S.faults[b.dataset.f] ? 'Falla inyectada: ' : 'Falla retirada: ') + b.textContent); render(); });
+$('bClr').onclick = () => { S.faults = { leak: false, ot: false, vib: false }; logEv(0, 'Fallas despejadas'); render(); };
+document.querySelectorAll('button.sp').forEach(b => b.onclick = () => { speed = +b.dataset.s; document.querySelectorAll('button.sp').forEach(x => x.classList.toggle('on', x === b)); });
+
+logEv(0, 'Sistema iniciado en operación nominal (50 MW, 9000 rpm)');
+for (let i = 0; i < 10; i++) { step(S); hist.p.push(S.power); hist.t01.push(S.t01); hist.man.push(S.man); hist.p01.push(S.p01); hist.vib.push(S.vib); hist.lel.push(S.lel); }
+render();
+setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
