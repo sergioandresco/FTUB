@@ -3,7 +3,7 @@
 Static single-page dashboard that simulates monitoring a 50 MW, 3-stage hydrogen gas turbine
 (Turbomáquinas course project). All data is simulated from the project's design values.
 
-No build step: the site is just `index.html`.
+No build step: the site is `index.html` plus the `img/` folder (keep both in the repo).
 
 ## Deploy on Vercel
 1. Push this folder to a GitHub repository.
@@ -72,7 +72,8 @@ The page runs a small simulation in the browser (JavaScript, 1 step = 1 s of sim
 
 ## 6. Files in this repo
 - `index.html`: the full dashboard (HTML + CSS + JS, no dependencies).
-- `assets/turbine-cad.jpg`: cutaway view of the Inventor CAD model, shown on the dashboard.
+- `img/cad-turbina.jpg`: cutaway view of the Inventor CAD model (hero image).
+- `img/inyeccion-h2-referencia.jpg`: reference illustration of H2 injection (source still to be cited).
 - `README.md`: this file (deployment steps and project context).
 
 ## 7. Suggested way to present it (1-2 minutes)

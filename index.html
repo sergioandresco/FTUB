@@ -3,27 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap">
 <title>Monitor Turbina H₂</title>
 <style>
-html{color-scheme:light}body{margin:0}
-:root{--bg:#f2f4f3;--panel:#fff;--panel2:#eaeeed;--fg:#14211d;--mut:#5b6b66;--line:#d5dcd9;--acc:#0b7a6b;--h2:#1f6fd1;--n2:#8a5cc7;--ok:#1e8a4c;--warn:#b7791f;--crit:#c0392b;--okbg:#e0f2e7;--warnbg:#fbefd5;--critbg:#f9dedb;--pipe:#b8c3bf}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1514;--panel:#16201e;--panel2:#1d2a27;--fg:#e4ede9;--mut:#8da099;--line:#2a3a36;--acc:#3ac7ae;--h2:#5aa2ff;--n2:#b794f0;--ok:#4cd086;--warn:#f0b04a;--crit:#ff6b5b;--okbg:#17332a;--warnbg:#3a2f17;--critbg:#3d1d1a;--pipe:#34453f;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0e1514;--panel:#16201e;--panel2:#1d2a27;--fg:#e4ede9;--mut:#8da099;--line:#2a3a36;--acc:#3ac7ae;--h2:#5aa2ff;--n2:#b794f0;--ok:#4cd086;--warn:#f0b04a;--crit:#ff6b5b;--okbg:#17332a;--warnbg:#3a2f17;--critbg:#3d1d1a;--pipe:#34453f;color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+html{color-scheme:light}body{margin:0;line-height:1.5}
+:root{--bg:#ffffff;--panel:#ffffff;--panel2:#f3f6f5;--fg:#12201c;--mut:#566761;--line:#e1e8e5;--acc:#0b7a6b;--accbg:#e6f4f1;--h2:#1f6fd1;--n2:#8a5cc7;--ok:#1e8a4c;--warn:#b7791f;--crit:#c0392b;--okbg:#e0f2e7;--warnbg:#fbefd5;--critbg:#f9dedb;--pipe:#c3cdc9}
+body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 *{box-sizing:border-box}
-.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
 header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
-h1{font-size:20px;margin:0;letter-spacing:.01em;text-wrap:balance}
-.sub{color:var(--mut);font-size:12px;margin-top:2px}
+h1{font-family:'Space Grotesk','Inter',sans-serif;font-size:clamp(2.1rem,6.2vw,3.9rem);line-height:1.04;margin:6px 0 0;letter-spacing:-.025em;font-weight:700;text-wrap:balance}
+h1 em{font-style:normal;color:var(--acc)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.lead{font-size:clamp(1rem,2.2vw,1.2rem);color:var(--mut);max-width:62ch;margin:14px 0 0;line-height:1.6}
+.hero{padding:18px 0 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr;gap:22px;align-items:center}
+@media(min-width:900px){.hero{grid-template-columns:1.05fr .95fr}}
+.herotxt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+.fig{margin:0;min-width:0}.fig img{display:block;width:100%;height:auto;border-radius:14px;background:#1d2634}
+.fig figcaption{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.45}
+.refrow{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:14px;align-items:center}
+@media(min-width:900px){.refrow{grid-template-columns:1fr 1fr}}
+.refrow p{margin:0;font-size:14px;color:var(--mut);line-height:1.65}.refrow p b{color:var(--fg)}
+h2.sec{font-family:'Space Grotesk','Inter',sans-serif;font-size:clamp(1.3rem,3vw,1.7rem);margin:6px 0 4px;letter-spacing:-.01em}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--panel2);border-radius:12px;padding:16px 18px;min-width:0}
+.card h3{font-family:'Space Grotesk','Inter',sans-serif;font-size:17px;margin:0 0 6px}
+.card p{margin:0;font-size:14px;color:var(--mut);line-height:1.6}
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 22px;margin:0}
+.gloss div{border-top:1px solid var(--line);padding:10px 0;min-width:0}
+.gloss dt{font-weight:600;font-size:14px;margin:0 0 2px}
+.gloss dd{margin:0;font-size:13.5px;color:var(--mut);line-height:1.55}
+.steps{margin:0;padding-left:20px;font-size:14px;color:var(--mut);line-height:1.7}.steps b{color:var(--fg)}
+.band{display:flex;flex-direction:column;gap:12px}
 .badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);letter-spacing:.04em}
 .pill.sim{color:var(--warn);border-color:var(--warn)}
 .pill.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
 .pill.warn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
 .pill.crit{background:var(--critbg);color:var(--crit);border-color:var(--crit)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 1px 2px rgba(18,32,28,.04)}
 .panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);margin:0 0 10px;font-weight:600}
 .ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
 .grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -45,10 +64,10 @@ label{font-size:12px;color:var(--mut)}
 .kpi .n{font-size:11px;color:var(--mut)}
 .synwrap{overflow-x:auto}
 svg.syn{min-width:760px;width:100%;display:block}
-svg text{fill:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif}
+svg text{fill:var(--fg);font-family:'Inter',system-ui,sans-serif}
 svg .m{fill:var(--mut);font-size:11px}
 svg .t{font-size:12px;font-weight:600}
-svg .v{font-size:12px;font-family:'IBM Plex Mono',monospace}
+svg .v{font-size:12px;font-family:'JetBrains Mono',monospace}
 .node{fill:var(--panel2);stroke:var(--line);stroke-width:1.5}
 .pipe{stroke:var(--pipe);stroke-width:6;fill:none;stroke-linecap:round}
 .pipe.h2{stroke:var(--h2)}.pipe.n2{stroke:var(--n2)}.pipe.flow{stroke-dasharray:10 8;animation:fl 1s linear infinite}
@@ -72,24 +91,59 @@ th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;lett
 .big{font-size:30px;font-weight:600;color:var(--ok)}
 .note{font-size:12px;color:var(--mut);line-height:1.5}
 .inv{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:6px}.inv i{display:block;height:100%;background:var(--h2)}
-.cad{margin:0}.cad img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:var(--panel2)}
-.cad figcaption{margin-top:8px}
 footer{font-size:11.5px;color:var(--mut);line-height:1.5;padding-bottom:10px}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
- <div><h1>Monitor de turbina de gas a hidrógeno · 50 MW</h1>
- <div class="sub">Gemelo digital · 3 etapas axiales · cámara Micromix · respaldo térmico de central hidroeléctrica</div></div>
- <div class="badges"><span class="pill sim">DATOS SIMULADOS</span><span class="pill" id="mode">—</span><span class="pill" id="gal">Sin alarmas</span></div>
+<header class="hero">
+ <div class="herotxt">
+ <div class="eyebrow">Gemelo digital · Turbomáquinas · 50 MW</div>
+ <h1>Turbina de gas a <em>hidrógeno</em></h1>
+ <p class="lead">Panel de monitoreo simulado de una turbina axial de 3 etapas que quema hidrógeno para dar respaldo térmico a una central hidroeléctrica sin emitir CO₂ en la combustión.</p>
+ <div class="badges" style="margin-top:10px"><span class="pill sim">DATOS SIMULADOS</span><span class="pill" id="mode">—</span><span class="pill" id="gal">Sin alarmas</span></div>
+ </div>
+ <figure class="fig herofig"><img src="img/cad-turbina.jpg" alt="Vista en corte del modelo CAD de la turbina: compresor en azul, etapa intermedia en morado y turbina en naranja" width="1332" height="709"><figcaption>Modelo CAD de la turbina en corte: compresor (azul), cámara de combustión y turbina de 3 etapas (naranja).</figcaption></figure>
 </header>
+
+<section class="band" id="about">
+ <h2 class="sec">¿Qué es este gemelo digital?</h2>
+ <p class="lead" style="margin:0">Un gemelo digital es una réplica virtual de un equipo físico que se comporta como él. Esta página es la réplica de la turbina del proyecto: permite ver cómo se monitorearía una turbina real durante el arranque, la operación y las fallas, sin necesidad de tener la máquina ni sensores.</p>
+ <div class="cards">
+  <div class="card"><h3>Qué simula</h3><p>El arranque completo (purga con N₂, encendido, aceleración, sincronización y subida de carga), la operación entre 40 % y 100 % de carga, la línea de hidrógeno desde el tanque hasta los inyectores, las tres etapas de la turbina, las alarmas y los disparos de seguridad.</p></div>
+  <div class="card"><h3>De dónde salen los datos</h3><p>Se calculan en el navegador con los valores de diseño del proyecto (1400 K, 10 bar, 84.35 kg/s, 9000 rpm) y las mismas ecuaciones de la memoria de cálculos: expansión real por etapas y balance de energía en la cámara. Se agrega un poco de ruido aleatorio para que parezcan lecturas reales.</p></div>
+  <div class="card"><h3>Qué no es</h3><p>No es una medición real ni un modelo de detalle. Es un modelo de línea media y estacionario. La carga parcial, los umbrales de alarma y el tamaño del tanque son supuestos del equipo, no datos de una norma.</p></div>
+ </div>
+</section>
+
+<section class="band" id="guide">
+ <h2 class="sec">Cómo usar la simulación</h2>
+ <ol class="steps">
+  <li><b>Arranca la turbina</b> con el botón verde y observa cómo cambian los estados (usa 8× para verlo rápido).</li>
+  <li><b>Cambia la carga</b> con el deslizador y mira cómo responden potencia, temperatura y consumo de H₂.</li>
+  <li><b>Inyecta una falla</b> y mira cómo se activan las alarmas y el disparo automático. Después usa "Despejar fallas" para poder arrancar otra vez.</li>
+ </ol>
+ <dl class="gloss">
+  <div><dt>Arrancar</dt><dd>Inicia la secuencia automática: purga con N₂, apertura de la válvula de H₂, encendido, aceleración a 9000 rpm, sincronización con la red y subida de carga. Solo está activo con la turbina en parada y sin fallas.</dd></div>
+  <div><dt>Parada normal</dt><dd>Corta el combustible y deja que el rotor frene, con purga de N₂ de la línea. Es la forma planeada de apagar la máquina.</dd></div>
+  <div><dt>Disparo de emergencia</dt><dd>Simula el botón de emergencia: corte inmediato del combustible. Queda registrado como evento crítico.</dd></div>
+  <div><dt>Carga solicitada</dt><dd>Potencia que pide la red, entre 40 % y 100 %. La turbina ajusta el flujo másico y la temperatura de entrada para entregarla.</dd></div>
+  <div><dt>Fuga de H₂</dt><dd>Simula un escape de hidrógeno. Sube el porcentaje del límite inferior de explosividad (LIE): alarma sobre 10 %, disparo sobre 25 %.</dd></div>
+  <div><dt>Sobretemperatura</dt><dd>Eleva la temperatura de entrada a la turbina. Primero alarma de T01 y de NOx (el riesgo del Micromix), y disparo por encima de 1470 K.</dd></div>
+  <div><dt>Vibración alta</dt><dd>Aumenta la vibración del rotor: alarma sobre 4.5 mm/s y disparo sobre 7.1 mm/s.</dd></div>
+  <div><dt>Despejar fallas</dt><dd>Retira todas las fallas inyectadas. Es necesario hacerlo antes de volver a arrancar.</dd></div>
+  <div><dt>Velocidad 1× / 3× / 8×</dt><dd>Acelera el tiempo de la simulación sin cambiar los resultados. Útil para ver el arranque completo en pocos segundos.</dd></div>
+  <div><dt>Indicadores y colores</dt><dd>Cada tarjeta tiene un borde verde (normal), amarillo (alarma) o rojo (crítico). El esquema muestra el recorrido del H₂ y de los gases; la tabla compara cada etapa con su valor de diseño; el contador resume el CO₂ evitado frente a gas natural.</dd></div>
+ </dl>
+</section>
+
+<h2 class="sec" style="margin-bottom:-8px">Panel de monitoreo</h2>
 
 <section class="panel"><h2>Control del escenario</h2>
  <div class="ctrl">
-  <div class="grp"><button class="go" id="bStart">Arrancar</button><button class="stop" id="bStop">Parada normal</button><button class="stop" id="bTrip">Disparo de emergencia</button></div>
+  <div class="grp"><button class="go" id="bStart" title="Inicia la secuencia de arranque">Arrancar</button><button class="stop" id="bStop" title="Parada controlada">Parada normal</button><button class="stop" id="bTrip" title="Corte inmediato de combustible">Disparo de emergencia</button></div>
   <div class="grp"><label for="load">Carga solicitada <b class="mono" id="loadV">100 %</b></label><input type="range" id="load" min="40" max="100" value="100"></div>
-  <div class="grp"><label>Inyectar falla:</label><button class="f" data-f="leak">Fuga de H₂</button><button class="f" data-f="ot">Sobretemperatura</button><button class="f" data-f="vib">Vibración alta</button><button id="bClr">Despejar fallas</button></div>
+  <div class="grp"><label>Inyectar falla:</label><button class="f" data-f="leak" title="Simula una fuga de hidrógeno">Fuga de H₂</button><button class="f" data-f="ot" title="Sube la temperatura de entrada">Sobretemperatura</button><button class="f" data-f="vib" title="Sube la vibración del rotor">Vibración alta</button><button id="bClr">Despejar fallas</button></div>
   <div class="grp"><label>Velocidad:</label><button class="sp on" data-s="1">1×</button><button class="sp" data-s="3">3×</button><button class="sp" data-s="8">8×</button></div>
  </div>
 </section>
@@ -97,6 +151,8 @@ footer{font-size:11.5px;color:var(--mut);line-height:1.5;padding-bottom:10px}
 <section class="kpis" id="kpis"></section>
 
 <section class="panel"><h2>Ruta del hidrógeno y del gas caliente</h2>
+ <div class="refrow"><figure class="fig"><img src="img/inyeccion-h2-referencia.jpg" alt="Ilustración de una turbina de gas con el hidrógeno entrando por varias cámaras de combustión" width="1200" height="675" loading="lazy"><figcaption>Imagen de referencia: inyección de H₂ en las cámaras de combustión de una turbina de gas. Fuente de la imagen por citar.</figcaption></figure>
+ <p><b>Así entra el hidrógeno.</b> El H₂ llega desde el tanque por una línea de acero inoxidable, pasa por la válvula de corte, el regulador y la válvula de control, y se reparte en un colector que alimenta los inyectores de la cámara. Ahí se mezcla con el aire del compresor y se quema; los gases calientes pasan por las tres etapas de la turbina y mueven el generador. El esquema de abajo sigue ese mismo recorrido con los valores simulados.</p></div>
  <div class="synwrap"><svg class="syn" viewBox="0 0 1000 250" role="img" aria-label="Esquema de la línea de hidrógeno desde el tanque hasta los inyectores y la turbina">
   <path class="pipe" id="p1" d="M110 80H170"/><path class="pipe" id="p2" d="M250 80H310"/><path class="pipe" id="p3" d="M390 80H450"/><path class="pipe" id="p4" d="M530 80H590"/>
   <path class="pipe n2" id="pn" d="M470 200V120" style="opacity:.15"/>
@@ -115,13 +171,6 @@ footer{font-size:11.5px;color:var(--mut);line-height:1.5;padding-bottom:10px}
   <text class="m" x="30" y="150">Línea SS 316L · arrestallamas antes del colector</text>
   <text class="m" x="590" y="150">Puntas de inyector en Inconel</text>
  </svg></div>
-</section>
-
-<section class="panel"><h2>Modelo CAD · vista en corte</h2>
- <figure class="cad">
-  <img src="assets/turbine-cad.jpg" width="1458" height="761" loading="lazy" alt="Vista en corte del modelo CAD de la turbina de gas a hidrógeno: compresor axial, cámara de combustión y etapas de turbina">
-  <figcaption class="note">Modelo 3D en Autodesk Inventor. Corte longitudinal que muestra el compresor axial, la cámara de combustión y las etapas de la turbina.</figcaption>
- </figure>
 </section>
 
 <section class="two">
